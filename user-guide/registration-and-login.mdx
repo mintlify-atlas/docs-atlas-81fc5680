@@ -1,0 +1,88 @@
+---
+title: "Registration and Login"
+description: "How to create a FitWave account, log in, and understand the session model."
+---
+
+FitWave uses a cookie-based session. All authentication requests are sent with `withCredentials: true`, so your browser stores the session cookie automatically — no manual token handling required.
+
+## Create an account
+
+Navigate to `/create-acount` to register a new user account. All four fields are required before the form can be submitted.
+
+<Steps>
+  <Step title="Open the registration page">
+    Go to `/create-acount` in your browser. You can also reach this page from the login screen by clicking **Regístrate aquí**.
+  </Step>
+  <Step title="Fill in your details">
+    Complete the following fields:
+
+    | Field | Description |
+    |---|---|
+    | First name (`firstName`) | Your given name |
+    | Last name (`lastName`) | Your family name |
+    | Email (`email`) | A valid email address — used to log in |
+    | Password (`password`) | Minimum 8 characters |
+  </Step>
+  <Step title="Submit the form">
+    Click **Crear mi cuenta**. The button is disabled until all fields are filled in.
+
+    On success, the app calls `POST /api/auth/user-register` and immediately signs you in. New accounts are assigned the `USER` role and redirected to `/user-dashboard`.
+
+    If registration fails (for example, because the email is already taken), an error modal appears with a description of the problem.
+  </Step>
+</Steps>
+
+## Log in
+
+Navigate to `/login` to sign in to an existing account.
+
+<Steps>
+  <Step title="Open the login page">
+    Go to `/login`. You can also reach this page from the registration screen by clicking **Inicia sesión**.
+  </Step>
+  <Step title="Enter your credentials">
+    | Field | Description |
+    |---|---|
+    | Email | The address used during registration |
+    | Password | Your account password |
+
+    The **Entrar a mi cuenta** button remains disabled until both fields are filled in.
+  </Step>
+  <Step title="Submit and get redirected">
+    Click **Entrar a mi cuenta**. The app calls `POST /api/auth/user-auth` and, on success, redirects you based on your role:
+
+    - `USER` role → `/user-dashboard`
+    - `ADMIN` role → `/admin-dashboard`
+
+    If the credentials are incorrect, an error modal is shown. No redirect occurs.
+  </Step>
+</Steps>
+
+## The `CurrentAuthUser` object
+
+After a successful login or registration, the application stores the authenticated user in memory using a `BehaviorSubject`. The shape of that object is:
+
+```typescript
+export interface CurrentAuthUser {
+  id?: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  roles: string[];    // e.g. ["USER"] or ["ADMIN"]
+  createdAt: string;
+  updatedAt: string;
+  enabled: boolean;
+}
+```
+
+The `enabled` flag is used to gate booking actions — a user whose `enabled` is `false` cannot reserve a class even if they appear to be logged in.
+
+## Session cookies
+
+Every request to `/api/auth/*` is made with `{ withCredentials: true }`. This means your browser includes the session cookie on subsequent requests automatically. You do not need to store or pass a token manually.
+
+The session can be re-hydrated at page load via `GET /api/auth/me`. If the session has expired (HTTP 401), the app treats you as unauthenticated.
+
+## Log out
+
+Click the **Logout** option in the navigation bar. The app calls `POST /api/auth/logout` and clears the in-memory user state.

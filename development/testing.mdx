@@ -1,0 +1,176 @@
+---
+title: "Testing"
+description: "How FitWave uses Vitest and Angular TestBed to run unit tests across services, guards, and components."
+---
+
+## Test runner
+
+FitWave uses **Vitest 4.0.8** as the test runner, integrated with Angular CLI 21's `@angular/build:unit-test` builder. Tests run via the standard Angular command:
+
+```bash
+ng test
+```
+
+<Note>
+  Angular CLI v21 ships with Vitest as the default unit test runner, replacing the Karma + Jasmine setup used in earlier Angular versions. The `jsdom` package (`^27.1.0`) is included as a dev dependency to provide a browser-like DOM environment for Vitest.
+</Note>
+
+## Test file conventions
+
+- Test files are co-located with the file they test and follow the `.spec.ts` naming convention.
+- Each spec file uses Angular's `TestBed` to configure a minimal testing module for the unit under test.
+- Services are injected with `TestBed.inject()`. Components are instantiated with `TestBed.createComponent()`.
+
+## Running tests
+
+```bash
+ng test
+```
+
+This triggers the `@angular/build:unit-test` builder defined in `angular.json`, which discovers all `*.spec.ts` files under `src/` and runs them with Vitest.
+
+## End-to-end tests
+
+```bash
+ng e2e
+```
+
+No e2e framework is bundled by default in Angular CLI 21. Running `ng e2e` will prompt you to install a third-party e2e package (such as Cypress or Playwright) if none is configured.
+
+## Test patterns
+
+### Service tests
+
+Service specs follow a consistent pattern: configure `TestBed`, inject the service, and assert it was created. This verifies the service's dependency injection metadata is valid and all constructor dependencies resolve correctly.
+
+**`BookingService`** (`src/app/services/booking-service.spec.ts`):
+
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { BookingService } from './booking-service';
+
+describe('BookingService', () => {
+  let service: BookingService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(BookingService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+});
+```
+
+**`GymClassService`** (`src/app/services/gym-class-service.spec.ts`):
+
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { GymClassService } from './gym-class-service';
+
+describe('GymClassService', () => {
+  let service: GymClassService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(GymClassService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+});
+```
+
+### Guard tests
+
+Functional guards (`CanActivateFn`) require wrapping the guard call in `TestBed.runInInjectionContext()` so Angular's `inject()` calls within the guard resolve correctly.
+
+**`HomeGuard`** (`src/app/guard/home-guard.spec.ts`):
+
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { CanActivateFn } from '@angular/router';
+import { HomeGuard } from './home-guard';
+
+describe('homeGuard', () => {
+  const executeGuard: CanActivateFn = (...guardParameters) =>
+    TestBed.runInInjectionContext(() => HomeGuard(...guardParameters));
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+  });
+
+  it('should be created', () => {
+    expect(executeGuard).toBeTruthy();
+  });
+});
+```
+
+### Component tests
+
+Component specs import `RouterModule.forRoot([])` when the component uses router directives or the `Router` service. Components are created with `TestBed.createComponent()` and DOM assertions target `fixture.nativeElement`.
+
+**`App`** (`src/app/app.spec.ts`):
+
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { RouterModule } from '@angular/router';
+import { App } from './app';
+
+describe('App', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [RouterModule.forRoot([])],
+      declarations: [App],
+    }).compileComponents();
+  });
+
+  it('should create the app', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    expect(app).toBeTruthy();
+  });
+
+  it('should render title', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, fitwave');
+  });
+});
+```
+
+## Spec file inventory
+
+All spec files in the project are co-located with their source:
+
+| File | Type |
+|---|---|
+| `src/app/app.spec.ts` | Root component |
+| `src/app/guard/home-guard.spec.ts` | Route guard |
+| `src/app/services/auth/auth-service.spec.ts` | Service |
+| `src/app/services/booking-service.spec.ts` | Service |
+| `src/app/services/gym-class-service.spec.ts` | Service |
+| `src/app/services/schedule-service.spec.ts` | Service |
+| `src/app/services/trainer-service.spec.ts` | Service |
+| `src/app/services/user-service.spec.ts` | Service |
+| `src/app/components/gym-classes-component/gym-classes-component.spec.ts` | Component |
+| `src/app/pages/auth/login-component/login-component.spec.ts` | Page component |
+| `src/app/pages/auth/create-acount-component/create-acount-component.spec.ts` | Page component |
+| `src/app/pages/home-component/home-component.spec.ts` | Page component |
+| `src/app/pages/dashboard/dashboard-user-component/dashboard-user-component.spec.ts` | Page component |
+| `src/app/pages/dashboard/dashboard-admin-component/dashboard-admin-component.spec.ts` | Page component |
+| `src/app/pages/booking-component/booking-component.spec.ts` | Page component |
+| `src/app/pages/schedule-component/schedule-component.spec.ts` | Page component |
+| `src/app/pages/user-component/user-component.spec.ts` | Page component |
+| `src/app/pages/create-admin-component/create-admin-component.spec.ts` | Page component |
+| `src/app/shared/nav-bar-component/nav-bar-component.spec.ts` | Shared component |
+| `src/app/shared/footer-component/footer-component.spec.ts` | Shared component |
+| `src/app/shared/modal-component/modal-component.spec.ts` | Shared component |
+| `src/app/shared/menu-component/menu-component.spec.ts` | Shared component |
+
+<Tip>
+  When writing tests for services that make HTTP calls (like `BookingService` or `GymClassService`), import `HttpClientTestingModule` from `@angular/common/http/testing` and use `HttpTestingController` to intercept and assert outgoing requests without hitting the real backend.
+</Tip>

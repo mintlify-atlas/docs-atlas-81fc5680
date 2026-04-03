@@ -1,0 +1,123 @@
+---
+title: "Managing Trainers"
+description: "How to register, view, and delete trainers in the FitWave admin dashboard."
+---
+
+Trainers are the professionals who lead gym classes at FitWave. Before you can create a class, you must have at least one trainer registered in the system.
+
+Trainer management lives inside the collapsible **Gestión de Entrenadores** section on the [Admin Dashboard](/admin-guide/admin-dashboard).
+
+## The Trainer interface
+
+```typescript
+export interface Trainer {
+  id?: number;      // Assigned by the backend; omit when creating
+  name: string;     // Full name of the trainer
+  specialty: string; // One of the accepted specialty values
+  bio: string;      // Biographical description
+}
+```
+
+## API reference
+
+### Create a trainer
+
+<ParamField body="name" type="string" required>
+  Full name of the trainer. Minimum 3 characters.
+</ParamField>
+
+<ParamField body="specialty" type="string" required>
+  Must be one of: `Boxeo`, `Crossfit`, `Musculación`, `Yoga`.
+</ParamField>
+
+<ParamField body="bio" type="string" required>
+  Biographical description. Minimum 10 characters.
+</ParamField>
+
+```bash
+POST /api/trainers
+Content-Type: application/json
+
+{
+  "name": "Marcos Peña",
+  "specialty": "Boxeo",
+  "bio": "Former professional boxer with 10 years of coaching experience."
+}
+```
+
+<ResponseField name="id" type="number">
+  The ID assigned to the newly created trainer.
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  The trainer's full name as stored.
+</ResponseField>
+
+<ResponseField name="specialty" type="string">
+  The trainer's specialty.
+</ResponseField>
+
+<ResponseField name="bio" type="string">
+  The trainer's bio.
+</ResponseField>
+
+### List all trainers
+
+```bash
+GET /api/trainers
+```
+
+Returns an array of `Trainer` objects.
+
+### Delete a trainer
+
+```bash
+DELETE /api/trainers/:id
+```
+
+Permanently removes the trainer with the given `id`. Returns `204 No Content` on success.
+
+## Creating a trainer
+
+<Steps>
+  <Step title="Open the Trainer Management section">
+    On the Admin Dashboard, click the **Gestión de Entrenadores** collapsible panel to expand it.
+  </Step>
+  <Step title="Fill in the registration form">
+    Complete the **Registrar Nuevo Entrenador** form on the left side of the panel:
+
+    - **Nombre Completo** — The trainer's full name (minimum 3 characters).
+    - **Especialidad** — Select one specialty from the dropdown:
+      - Boxeo Técnico (`Boxeo`)
+      - Crossfit / HIIT (`Crossfit`)
+      - Musculación / Fitness (`Musculación`)
+      - Yoga / Pilates (`Yoga`)
+    - **Bio** — A description of the trainer's background and approach (minimum 10 characters).
+  </Step>
+  <Step title="Submit the form">
+    Click **Guardar Entrenador**. The button is disabled until all fields are valid. On success, the form resets and the trainer appears in the Registered Staff table below.
+  </Step>
+</Steps>
+
+## Registered Staff table
+
+The table beneath the form lists all trainers currently in the system with the following columns:
+
+| Column | Description |
+|--------|-------------|
+| ID | Auto-assigned numeric identifier (monospace format) |
+| Entrenador | Full name of the trainer |
+| Especialidad | Specialty badge |
+| Acciones | View details and delete buttons |
+
+### Viewing trainer details
+
+Click the eye icon in the **Acciones** column to open a modal showing the trainer's full name, specialty badge, and complete bio.
+
+### Deleting a trainer
+
+<Warning>
+  Deleting a trainer is permanent and cannot be undone. Any classes currently assigned to this trainer will retain the trainer reference in the database, but the trainer will no longer appear in the system.
+</Warning>
+
+Click the trash icon in the **Acciones** column. A confirmation modal will appear showing the trainer's name and warning that the action cannot be undone. Click **Sí, eliminar** to proceed or **No, cancelar** to dismiss.

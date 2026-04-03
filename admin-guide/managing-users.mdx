@@ -1,0 +1,123 @@
+---
+title: "Managing Users"
+description: "How to view, disable, and manage member accounts and admin users in FitWave."
+---
+
+The User Management panel gives admins a full view of every registered account on the platform. From here you can monitor account status, disable members, and create new admin accounts.
+
+Navigate to `/dashboard/users` directly, or click the **Gest. Usuarios** button in the top-right corner of the [Admin Dashboard](/admin-guide/admin-dashboard).
+
+## The UserResponse interface
+
+```typescript
+export interface UserResponse {
+  firstName: string;   // Member's first name
+  lastName: string;    // Member's last name
+  email: string;       // Unique email address (used as the account identifier)
+  roles: string[];     // e.g. ["ROLE_USER"] or ["ROLE_ADMIN"]
+  createdAt: string;   // ISO 8601 timestamp of account creation
+  updatedAt: string;   // ISO 8601 timestamp of last update
+  enabled: boolean;    // true = active, false = disabled
+}
+```
+
+## API reference
+
+### List all users
+
+```bash
+GET /api/user
+```
+
+Returns an array of `UserResponse` objects for every account in the system.
+
+### Disable a user
+
+<ParamField path="email" type="string" required>
+  The email address of the account to disable. URL-encoded if necessary.
+</ParamField>
+
+```bash
+PUT /api/user/disable-user/:email
+```
+
+Toggles the `enabled` status of the account. If the account is currently active it will be disabled; if it is already disabled, this call re-enables it. The user list is refreshed automatically after the action completes.
+
+## User table
+
+The user table shows all registered accounts with the following columns:
+
+| Column | Description |
+|--------|-------------|
+| Usuario | Avatar initials, full name, and "FitWave Member" label |
+| Email | The account's email address |
+| Roles | Role badges with the `ROLE_` prefix stripped (e.g. `USER`, `ADMIN`) |
+| Estado | Green **Activo** or red **Deshabilitado** status badge |
+| Registro | Account creation date in `dd/MM/yyyy HH:mm` format |
+| Acciones | Disable/enable button |
+
+## Disabling a user
+
+<Warning>
+  Disabling an account prevents the member from logging in and making bookings. The action can be reversed by clicking the disable button again, which re-enables the account. The primary admin account (`admin@fitwave.com`) cannot be disabled and its action button is permanently inactive.
+</Warning>
+
+<Steps>
+  <Step title="Locate the account">
+    Find the member in the user table by email, name, or role.
+  </Step>
+  <Step title="Click the disable button">
+    Click the circle-slash icon in the **Acciones** column for that row. A confirmation modal will appear showing the member's name.
+  </Step>
+  <Step title="Confirm the action">
+    Click **Sí** in the modal to proceed, or dismiss the modal to cancel. The table refreshes automatically after the action.
+  </Step>
+</Steps>
+
+## Creating a new admin
+
+Admin accounts have full access to all FitWave management features. To create one:
+
+<Steps>
+  <Step title="Open the Create Admin form">
+    On the User Management page, click **Crear nuevo Admin**. You will be navigated to `/create-admin`.
+  </Step>
+  <Step title="Fill in the new admin's details">
+    Complete the registration form:
+
+    - **Nombre** — First name of the new admin.
+    - **Apellidos** — Last name of the new admin.
+    - **Email** — A unique email address that will serve as the login identifier.
+    - **Contraseña** — A password of at least 8 characters.
+  </Step>
+  <Step title="Submit the form">
+    Click **Crear nuevo admin**. On success, a confirmation banner reading "Nuevo admin registrado" appears with a **Regresar al panel** button that navigates to the home page (`/home`).
+  </Step>
+</Steps>
+
+<Note>
+  New accounts created through `/create-admin` are assigned the `ROLE_ADMIN` role automatically. Regular member accounts are created through the public registration flow and receive `ROLE_USER`.
+</Note>
+
+## Viewing bookings
+
+Admins can view all bookings made across the platform at `/dashboard/reservas`. The bookings list is powered by:
+
+```bash
+GET /api/bookings
+```
+
+Each booking in the list shows:
+
+| Column | Description |
+|--------|-------------|
+| ID | The `bookingId` in monospace format |
+| Fecha Reserva | Booking creation timestamp |
+| Estado | `CONFIRMED`, `PENDING`, or `CANCELLED` status badge |
+| Acciones | Cancel button (hidden if booking is already cancelled) |
+
+Admins can cancel any active booking directly from this view by clicking **Cancelar**, which calls:
+
+```bash
+PATCH /api/bookings/:id/cancel
+```

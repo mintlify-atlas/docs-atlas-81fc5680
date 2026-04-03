@@ -1,80 +1,95 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: "Quick start"
+description: "Register a FitWave account, log in, browse classes, and make your first booking."
 ---
 
-## Get started in three steps
+This guide walks through the core member flow: creating an account, logging in, finding a class, booking a slot, and reviewing your bookings.
 
-Get your documentation site running locally and make your first customization.
+<Info>
+  The FitWave backend must be running at `http://localhost:8080` before you start the Angular dev server. The frontend sends all API requests to that origin.
+</Info>
 
-### Step 1: Set up your local environment
+## Start the development server
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+```bash
+npm install
+npm start
+```
 
-### Step 2: Deploy your changes
+The app is served at `http://localhost:4200` by default.
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+## Member flow
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+<Steps>
+  <Step title="Register an account">
+    Navigate to `/create-acount`. Fill in your first name, last name, email, and password.
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    The form submits a `POST` request to `/api/auth/user-register`. On success, you are signed in automatically and redirected to your dashboard — no separate login step needed.
 
-### Step 3: Go live
+    ```typescript
+    // CreatedUser payload sent on registration
+    {
+      firstName: string;
+      lastName: string;
+      email: string;
+      password: string;
+      roles: string[];
+    }
+    ```
+  </Step>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+  <Step title="Log in">
+    Navigate to `/login`. Enter the email and password you registered with.
+
+    A `POST` request is sent to `/api/auth/user-auth`. The server responds with a session cookie and your user profile including your `roles` array.
+
+    - Members with the `ROLE_USER` role are redirected to `/user-dashboard`.
+    - Accounts with an admin role are redirected to `/admin-dashboard`.
+  </Step>
+
+  <Step title="Browse classes">
+    From `/user-dashboard`, the app loads all available gym classes via `GET /api/classes`. Each class card shows:
+
+    - Class title and description
+    - Difficulty level
+    - Assigned trainer name
+
+    Select a class to see its scheduled time slots.
+  </Step>
+
+  <Step title="Book a class">
+    Choose an available schedule slot. The app checks remaining capacity using `occupiedSlots` vs `totalSlots` from the schedule.
+
+    Confirming a booking sends a `POST` request to `/api/bookings` with your user ID, the selected schedule ID, and an initial status of `PENDING`.
+
+    ```typescript
+    // Booking payload
+    {
+      userId: number;
+      scheduleId: number;
+      status: 'PENDING';
+    }
+    ```
+  </Step>
+
+  <Step title="View and manage bookings">
+    Your bookings are listed on `/user-dashboard` after a `GET /api/bookings/:userId` call. Each booking shows the class, schedule time, and current status (`PENDING`, `CONFIRMED`, or `CANCELLED`).
+
+    To cancel a booking, select it and confirm. This sends `PATCH /api/bookings/:id/cancel` to the backend and updates the slot's occupied count.
+  </Step>
+</Steps>
+
+<Tip>
+  Administrators have access to `/admin-dashboard`, which adds full CRUD for gym classes (`/api/classes`), trainers (`/api/trainers`), and schedules (`/api/schedules`), as well as user management at `dashboard/users` — including the ability to disable member accounts via `/api/user/disable-user/:email`.
+</Tip>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Architecture overview" icon="diagram-project" href="/architecture">
+    Understand the Angular service layer, data models, and API structure.
+  </Card>
+  <Card title="Introduction" icon="book-open" href="/introduction">
+    Learn about FitWave's features and the two user roles in detail.
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

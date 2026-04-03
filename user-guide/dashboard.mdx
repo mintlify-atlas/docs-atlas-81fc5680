@@ -1,0 +1,51 @@
+---
+title: "User Dashboard"
+description: "Overview of the FitWave user dashboard — browse classes and manage your upcoming bookings in one place."
+---
+
+The user dashboard is available at `/user-dashboard` after logging in with a `USER` role account. It combines two main sections on a single page: a live class browser at the top and your personal booking list below.
+
+<CardGroup cols={2}>
+  <Card title="Class browser" icon="dumbbell">
+    The full gym classes component is embedded at the top of the dashboard. You can browse every available class, view its schedules, and click **Reservar** to start a booking — without leaving the dashboard.
+  </Card>
+  <Card title="My Upcoming Classes" icon="calendar">
+    Below the class browser, all bookings associated with your account are displayed as cards. Each card shows the booking reference, date, status, and a prompt to check your schedule for room details.
+  </Card>
+</CardGroup>
+
+## Class browser
+
+The class browser at the top of the dashboard works identically to the one on the home page. It loads data on page initialization:
+
+1. `GET /api/classes` — fetches all gym classes
+2. `GET /api/schedules` (schedules endpoint) — fetches all schedules, matched to each class client-side by `gymClassId`
+
+Clicking **Reservar** on a schedule slot opens a confirmation modal. Confirming creates a new booking via `POST /api/bookings` and the new entry appears in the **My Upcoming Classes** section immediately.
+
+## My Upcoming Classes
+
+Your bookings are loaded by calling `GET /api/bookings/:userId`, where `:userId` is your account's `id` from the `CurrentAuthUser` session object.
+
+### Booking card details
+
+Each booking is rendered as a card showing:
+
+| Field | Description |
+|---|---|
+| Booking ID | The unique reference number for the booking (`bookingId`) |
+| Booking date | The date the booking was created, formatted as a short date (`bookingDate`) |
+| Status badge | The current booking status: `PENDING`, `CONFIRMED`, or `CANCELLED` |
+| Schedule info | A note to consult your schedule for room and time details |
+
+### Empty state
+
+If you have no bookings yet, the section displays an informational alert:
+
+> "Aún no tienes reservas — ¡Inscríbete en una de nuestras clases arriba para empezar a entrenar!"
+
+This state resolves as soon as you complete your first booking using the class browser above.
+
+## Role-based access
+
+The user dashboard is only intended for accounts with the `USER` role. If you log in with an `ADMIN` account, the application redirects you to `/admin-dashboard` instead. Attempting to access `/user-dashboard` directly as an admin is not a supported workflow.

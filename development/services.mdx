@@ -1,0 +1,232 @@
+---
+title: "Angular Services"
+description: "Reference for all six injectable services in FitWave and their HTTP method signatures."
+---
+
+All services are decorated with `@Injectable({ providedIn: 'root' })`, making them available application-wide as singletons. They each inject Angular's `HttpClient` and communicate with the backend REST API at `http://localhost:8080`.
+
+## AuthService
+
+**File:** `src/app/services/auth/auth-service.ts`  
+**Base URL:** `http://localhost:8080/api/auth/`
+
+`AuthService` handles all authentication flows and maintains the current user's session state in a `BehaviorSubject<CurrentAuthUser>`. All HTTP requests use `{ withCredentials: true }` to send session cookies.
+
+```typescript
+// Method signatures
+registerUser(data: CreatedUser): Observable<any>
+authenticateUser(email: string, password: string): Observable<CurrentAuthUser>
+getSession(): Observable<CurrentAuthUser | null>
+logout(): Observable<any>
+getUserLoggedIn$(): Observable<CurrentAuthUser>
+getUserLoggedIn(): CurrentAuthUser
+setUserLoggedIn$(userData: CurrentAuthUser): void
+```
+
+| Method | HTTP | Endpoint |
+|---|---|---|
+| `registerUser` | `POST` | `/api/auth/user-register` |
+| `authenticateUser` | `POST` | `/api/auth/user-auth` |
+| `getSession` | `GET` | `/api/auth/me` |
+| `logout` | `POST` | `/api/auth/logout` |
+
+`getSession()` handles 401 errors gracefully by returning `of(null)` instead of propagating the error. All other HTTP errors are re-thrown.
+
+`getUserLoggedIn$()` and `getUserLoggedIn()` expose the current user from the `BehaviorSubject` — as an observable stream and as a synchronous snapshot, respectively. Use `setUserLoggedIn$()` to update the session state after a successful login.
+
+The `CurrentAuthUser` interface used throughout this service:
+
+```typescript
+export interface CurrentAuthUser {
+  id?: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  roles: string[];
+  createdAt: string;
+  updatedAt: string;
+  enabled: boolean;
+}
+```
+
+---
+
+## GymClassService
+
+**File:** `src/app/services/gym-class-service.ts`  
+**Base URL:** `http://localhost:8080/api/classes`
+
+Manages the catalog of gym classes available at the facility.
+
+```typescript
+getClasses(): Observable<GymClass[]>
+createClass(newClass: GymClass): Observable<GymClass>
+deleteClass(classIdToDelete: number): Observable<any>
+```
+
+| Method | HTTP | Endpoint |
+|---|---|---|
+| `getClasses` | `GET` | `/api/classes` |
+| `createClass` | `POST` | `/api/classes` |
+| `deleteClass` | `DELETE` | `/api/classes/:id` |
+
+The `GymClass` interface:
+
+```typescript
+export interface GymClass {
+  id: number;
+  title: string;
+  description: string;
+  difficulty: string;
+  trainerId: number;
+  trainerName: string;
+}
+```
+
+---
+
+## BookingService
+
+**File:** `src/app/services/booking-service.ts`  
+**Base URL:** `http://localhost:8080/api/bookings`
+
+Handles member class bookings, including creation and cancellation.
+
+```typescript
+getAllBookings(): Observable<Booking[]>
+getByUserId(userId: number): Observable<Booking[]>
+createBooking(booking: Booking): Observable<Booking>
+cancelBooking(id: number): Observable<void>
+```
+
+| Method | HTTP | Endpoint |
+|---|---|---|
+| `getAllBookings` | `GET` | `/api/bookings` |
+| `getByUserId` | `GET` | `/api/bookings/:userId` |
+| `createBooking` | `POST` | `/api/bookings` |
+| `cancelBooking` | `PATCH` | `/api/bookings/:id/cancel` |
+
+The `Booking` interface:
+
+```typescript
+export interface Booking {
+  bookingId?: number;
+  bookingDate?: string;
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
+  userId: number;
+  scheduleId: number;
+}
+```
+
+<Note>
+  `cancelBooking` uses `PATCH` rather than `DELETE`. It sends an empty body to `/api/bookings/:id/cancel`, which transitions the booking status to `CANCELLED` on the backend without removing the record.
+</Note>
+
+---
+
+## ScheduleService
+
+**File:** `src/app/services/schedule-service.ts`  
+**Base URL:** `http://localhost:8080/api/schedules`
+
+Provides full CRUD for class schedule slots — the time-and-room assignments for a `GymClass`.
+
+```typescript
+getAllSchedules(): Observable<Schedule[]>
+getScheduleById(id: number): Observable<Schedule>
+createSchedule(schedule: Schedule): Observable<Schedule>
+updateSchedule(id: number, schedule: Schedule): Observable<Schedule>
+deleteSchedule(id: number): Observable<void>
+```
+
+| Method | HTTP | Endpoint |
+|---|---|---|
+| `getAllSchedules` | `GET` | `/api/schedules` |
+| `getScheduleById` | `GET` | `/api/schedules/:id` |
+| `createSchedule` | `POST` | `/api/schedules` |
+| `updateSchedule` | `PUT` | `/api/schedules/:id` |
+| `deleteSchedule` | `DELETE` | `/api/schedules/:id` |
+
+The `Schedule` interface:
+
+```typescript
+export interface Schedule {
+  scheduleId?: number;
+  dayOfWeek: number;      // 1 = Monday, 7 = Sunday
+  startTime: string;      // "HH:mm:ss"
+  endTime: string;        // "HH:mm:ss"
+  room: string;
+  totalSlots: number;
+  occupiedSlots: number;
+  gymClassId: number;
+}
+```
+
+---
+
+## TrainerService
+
+**File:** `src/app/services/trainer-service.ts`  
+**Base URL:** `http://localhost:8080/api/trainers`
+
+Manages trainer profiles associated with gym classes.
+
+```typescript
+createTrainer(trainer: Trainer): Observable<Trainer>
+getTrainers(): Observable<Trainer[]>
+deleteTrainer(trainerIdToDelete: number): Observable<void>
+```
+
+| Method | HTTP | Endpoint |
+|---|---|---|
+| `createTrainer` | `POST` | `/api/trainers` |
+| `getTrainers` | `GET` | `/api/trainers` |
+| `deleteTrainer` | `DELETE` | `/api/trainers/:id` |
+
+The `Trainer` interface:
+
+```typescript
+export interface Trainer {
+  id?: number;
+  name: string;
+  specialty: string;
+  bio: string;
+}
+```
+
+---
+
+## UserService
+
+**File:** `src/app/services/user-service.ts`  
+**Base URL:** `http://localhost:8080/api/user`
+
+Provides admin-facing user management: listing all registered users and toggling a user's enabled status.
+
+```typescript
+getAllUsers(): Observable<UserResponse[]>
+disableUser(email: string): Observable<any>
+```
+
+| Method | HTTP | Endpoint |
+|---|---|---|
+| `getAllUsers` | `GET` | `/api/user` |
+| `disableUser` | `PUT` | `/api/user/disable-user/:email` |
+
+The `UserResponse` interface:
+
+```typescript
+export interface UserResponse {
+  firstName: string;
+  lastName: string;
+  email: string;
+  roles: string[];
+  createdAt: string;
+  updatedAt: string;
+  enabled: boolean;
+}
+```
+
+<Warning>
+  `disableUser` sends a `PUT` request with an empty body. It operates on the user identified by `email` in the URL path, not by ID. Ensure the correct email is passed — there is no confirmation step.
+</Warning>

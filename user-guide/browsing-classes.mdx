@@ -1,0 +1,76 @@
+---
+title: "Browsing Gym Classes"
+description: "How to explore available gym classes and their weekly schedules in FitWave."
+---
+
+The gym classes component is a shared widget embedded in two places: the public home page (`/home`) and the authenticated user dashboard (`/user-dashboard`). Both surfaces show the same live data.
+
+<Tip>
+  Classes and schedules are fetched on component initialization. Classes come from `GET /api/classes` and schedules from the schedules endpoint. The list refreshes automatically each time you navigate to a page that contains the component.
+</Tip>
+
+## What you see on the class listing
+
+Each class card displays:
+
+- **Title** — the name of the class (e.g., "CrossFit", "Yoga Restore")
+- **Description** — a short summary of the activity
+- **Available schedules** — each schedule slot listed under the class, showing the day of the week and the start/end time
+- A **Reservar** (Book) button on each schedule slot
+
+The difficulty level is carried on the `GymClass` object and can be used for filtering. The trainer's name (`trainerName`) is also part of the class data.
+
+## The `GymClass` interface
+
+```typescript
+export interface GymClass {
+  id: number;
+  title: string;
+  description: string;
+  difficulty: string;   // "Principiante" | "Intermedio" | "Avanzado"
+  trainerId: number;
+  trainerName: string;
+}
+```
+
+## Selecting a class and viewing schedules
+
+Schedules are loaded alongside classes and matched client-side by `gymClassId`. Each card in the listing already shows all schedules that belong to that class — you do not need to navigate to a separate page.
+
+To proceed to booking, click **Reservar** on the schedule slot you want. The component checks your session state before continuing:
+
+- If you are logged in with an **active** (`enabled: true`) account, a confirmation modal opens to confirm the booking.
+- If you are **not logged in** (or your account is disabled), a prompt appears with a button that navigates to `/create-acount` to register or sign in first.
+
+## The `Schedule` interface
+
+```typescript
+export interface Schedule {
+  scheduleId?: number;
+  dayOfWeek: number;    // 1 = Monday, 2 = Tuesday, ..., 7 = Sunday
+  startTime: string;    // "HH:mm:ss"
+  endTime: string;      // "HH:mm:ss"
+  room: string;
+  totalSlots: number;
+  occupiedSlots: number;
+  gymClassId: number;
+}
+```
+
+The `dayOfWeek` mapping is:
+
+| Value | Day |
+|---|---|
+| 1 | Monday |
+| 2 | Tuesday |
+| 3 | Wednesday |
+| 4 | Thursday |
+| 5 | Friday |
+| 6 | Saturday |
+| 7 | Sunday |
+
+`totalSlots` and `occupiedSlots` reflect the capacity of each session. A slot where `occupiedSlots >= totalSlots` is full.
+
+## Empty state
+
+If `GET /api/classes` returns an empty array, the component displays an informational alert: "No hay clases disponibles en este momento." No action is required on your part — check back later or contact an administrator.

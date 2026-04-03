@@ -1,0 +1,84 @@
+---
+title: "Admin Dashboard"
+description: "Overview of the FitWave administration panel and its main management sections."
+---
+
+The admin dashboard is the central hub for managing FitWave's trainers, classes, schedules, and users. It is accessible at `/admin-dashboard` and is only available to accounts with the `ADMIN` role.
+
+The dashboard is organized into two collapsible sections — **Trainer Management** and **Class Management** — plus a top-level navigation button to the User Management panel.
+
+## Layout
+
+When you open the dashboard you will see:
+
+- A page header reading "Panel de Administración"
+- A **Gest. Usuarios** button in the top-right corner that navigates to `/dashboard/users`
+- A collapsible **Trainer Management** section for creating and listing trainers
+- A collapsible **Class Management** section for creating and listing gym classes
+
+Each collapsible section can be expanded independently. Both sections load their data from the backend on page initialization.
+
+## Admin sections
+
+<CardGroup cols={2}>
+  <Card
+    title="Managing Trainers"
+    icon="person-running"
+    href="/admin-guide/managing-trainers"
+  >
+    Register new trainers, assign specialties, view bios, and remove trainers from the system.
+  </Card>
+  <Card
+    title="Managing Gym Classes"
+    icon="dumbbell"
+    href="/admin-guide/managing-classes"
+  >
+    Create gym class offerings, link them to a responsible trainer, and manage the class catalogue.
+  </Card>
+  <Card
+    title="Managing Schedules"
+    icon="calendar"
+    href="/admin-guide/managing-schedules"
+  >
+    Assign time slots and rooms to classes, set capacity limits, and monitor occupancy in real time.
+  </Card>
+  <Card
+    title="Managing Users"
+    icon="users"
+    href="/admin-guide/managing-users"
+  >
+    View all registered members, disable accounts, and create new admin accounts.
+  </Card>
+</CardGroup>
+
+## Trainer Management section
+
+Expand the **Gestión de Entrenadores** collapsible to:
+
+- Fill in and submit the **Register New Trainer** form (Name, Specialty, Bio)
+- Browse the **Registered Staff** table showing ID, name, specialty, and action buttons
+
+From the table you can open a trainer's full bio in a modal, or open a delete confirmation dialog to remove the trainer permanently.
+
+See [Managing Trainers](/admin-guide/managing-trainers) for step-by-step instructions.
+
+## Class Management section
+
+Expand the **Gestión de Clases** collapsible to:
+
+- Fill in and submit the **New Class** form (Title, Difficulty, Trainer, Description)
+- Browse the **Class Listing** cards showing title, description, and actions
+
+From the class cards you can open a detail modal showing the class description and assigned trainer, or open a delete confirmation dialog.
+
+<Note>
+  The trainer's name is linked automatically when you select a trainer from the dropdown — you do not need to type it manually.
+</Note>
+
+See [Managing Gym Classes](/admin-guide/managing-classes) for step-by-step instructions.
+
+## Navigating to User Management
+
+Click the **Gest. Usuarios** button in the top-right corner of the dashboard header. This navigates to `/dashboard/users` where you can view all registered members, disable accounts, and create new admins.
+
+See [Managing Users](/admin-guide/managing-users) for details.

@@ -1,0 +1,95 @@
+---
+title: "Development Setup"
+description: "Get FitWave running locally with Node.js, Angular CLI, and a backend API."
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js** — required to run the Angular toolchain
+- **npm 10.8.2** or later (enforced by `packageManager` in `package.json`)
+- **Angular CLI 21** — used for serving, building, and testing
+
+<CodeGroup>
+
+```bash Install Angular CLI
+npm install -g @angular/cli@21
+```
+
+```bash Verify versions
+node --version
+npm --version
+ng version
+```
+
+</CodeGroup>
+
+## Local setup
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/alemadorran/fitwave_f_030426.git
+    cd fitwave_f_030426
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    ```bash
+    npm install
+    ```
+
+    This installs all Angular framework packages, Tailwind CSS 4, DaisyUI 5, RxJS, and Vitest.
+  </Step>
+
+  <Step title="Start the development server">
+    ```bash
+    ng serve
+    ```
+
+    The application opens at `http://localhost:4200`. The dev server watches for file changes and reloads automatically — no manual refresh needed.
+  </Step>
+
+  <Step title="Ensure the backend API is running">
+    FitWave's Angular app communicates with a REST API at `http://localhost:8080`. All services (auth, bookings, schedules, classes, trainers, users) point to this base URL.
+
+    <Note>
+      The backend API must be running separately on port 8080 before you use authentication or any data features. The frontend will load without it, but all HTTP calls will fail.
+    </Note>
+  </Step>
+</Steps>
+
+## Production build
+
+Run the build command to compile the application for production. Output is written to the `dist/` directory.
+
+<CodeGroup>
+
+```bash Build for production
+ng build
+```
+
+```bash Build in watch mode (development)
+ng build --watch --configuration development
+```
+
+</CodeGroup>
+
+The production build applies output hashing for cache busting and enforces bundle size budgets (`500 kB` warning, `1 MB` error for the initial bundle).
+
+<Tip>
+  Use `ng build --configuration development` during development to disable optimizations and enable source maps, making debugging easier.
+</Tip>
+
+## Environment summary
+
+| Tool | Version |
+|---|---|
+| Angular | ^21.1.0 |
+| Angular CLI | ^21.1.2 |
+| TypeScript | ~5.9.2 |
+| npm | 10.8.2 |
+| Vitest | ^4.0.8 |
+| Tailwind CSS | ^4.1.18 |
+| DaisyUI | ^5.5.17 |

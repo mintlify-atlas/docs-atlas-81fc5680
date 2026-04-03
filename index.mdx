@@ -1,97 +1,53 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Welcome to FitWave"
+description: "Your all-in-one gym management platform for members and administrators."
 ---
 
-## Setting up
+FitWave is a modern gym management web application that helps members discover and book fitness classes while giving administrators full control over trainers, class offerings, and weekly schedules.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Set up your account and book your first class in minutes.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Browse Classes" icon="dumbbell" href="/user-guide/browsing-classes">
+    Explore available gym classes, difficulty levels, and trainers.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Admin Dashboard" icon="gauge" href="/admin-guide/admin-dashboard">
+    Manage trainers, classes, schedules, and members from one place.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Architecture" icon="sitemap" href="/architecture">
+    Understand how FitWave's Angular frontend connects to the backend API.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Get started in four steps
 
-Everything you need to create world-class documentation.
+<Steps>
+  <Step title="Create your account">
+    Register at the FitWave home page with your name, email, and password. Once registered, you'll be logged in automatically.
+  </Step>
+  <Step title="Browse gym classes">
+    From your dashboard, explore all available classes — each card shows the class description, difficulty, trainer, and all available schedule slots.
+  </Step>
+  <Step title="Pick a schedule and book">
+    Select a class, choose a time slot from the weekly schedule, and confirm your booking. You'll see it appear in **My Upcoming Classes** immediately.
+  </Step>
+  <Step title="Manage your bookings">
+    View all your reservations on your dashboard. Cancel any upcoming booking with a single click if your plans change.
+  </Step>
+</Steps>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Who is FitWave for?
 
-## Need inspiration?
+<CardGroup cols={2}>
+  <Card title="Members" icon="person-running">
+    Register, browse, and book fitness classes. Track your upcoming sessions and cancel when needed — all from one dashboard.
+  </Card>
+  <Card title="Administrators" icon="shield-halved">
+    Create and manage trainers, define gym classes, publish weekly schedules, and oversee the full member roster.
+  </Card>
+</CardGroup>
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<Note>
+  FitWave is built with Angular 21 and TailwindCSS + DaisyUI. It communicates with a REST API backend running at `http://localhost:8080`.
+</Note>

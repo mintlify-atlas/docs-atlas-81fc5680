@@ -1,0 +1,82 @@
+---
+title: "Booking a Class"
+description: "Step-by-step guide to reserving a gym class slot and managing your bookings in FitWave."
+---
+
+Bookings link your user account to a specific class schedule. Each booking has a status that tracks its lifecycle from creation through to cancellation.
+
+## The `Booking` interface
+
+```typescript
+export interface Booking {
+  bookingId?: number;
+  bookingDate?: string;
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
+  userId: number;
+  scheduleId: number;
+}
+```
+
+| Status | Meaning |
+|---|---|
+| `PENDING` | Booking submitted, awaiting confirmation from the gym |
+| `CONFIRMED` | Booking accepted — your place is reserved |
+| `CANCELLED` | Booking was cancelled by you or an administrator |
+
+## How to book a class
+
+<Steps>
+  <Step title="Browse available classes">
+    Open the gym classes section on the home page or your user dashboard at `/user-dashboard`. Each class card shows its available schedule slots with day, start time, and end time.
+  </Step>
+  <Step title="Select a schedule slot">
+    Click the **Reservar** button on the schedule row you want to attend.
+
+    If you are not logged in, a prompt appears asking you to register or sign in first. You must have an active, enabled session to proceed.
+  </Step>
+  <Step title="Confirm the booking">
+    A confirmation modal appears showing the class title and the selected schedule. Review the details, then click **Sí, inscribirme** to confirm.
+
+    Clicking **No** closes the modal without creating a booking.
+  </Step>
+  <Step title="Booking is created">
+    The app calls `POST /api/bookings` with your `userId` and the selected `scheduleId`. The new booking starts in `PENDING` status.
+
+    ```typescript
+    // Request body sent to POST /api/bookings
+    {
+      status: 'PENDING',
+      userId: number,
+      scheduleId: number
+    }
+    ```
+
+    Your new booking appears immediately in the **My Upcoming Classes** section of the dashboard.
+  </Step>
+</Steps>
+
+## API endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/api/bookings` | Create a new booking |
+| `PATCH` | `/api/bookings/:id/cancel` | Cancel an existing booking |
+| `GET` | `/api/bookings/:userId` | Retrieve all bookings for a user |
+
+## How to cancel a booking
+
+<Warning>
+  Cancellation cannot be undone. Once a booking is cancelled, its status changes to `CANCELLED` permanently and you will need to create a new booking if you want to attend the same class.
+</Warning>
+
+<Steps>
+  <Step title="Go to your dashboard">
+    Navigate to `/user-dashboard` and scroll down to the **My Upcoming Classes** section.
+  </Step>
+  <Step title="Find the booking to cancel">
+    Each booking card shows the booking ID, booking date, and current status badge.
+  </Step>
+  <Step title="Click cancel">
+    Click the cancel action on the booking card. The app calls `PATCH /api/bookings/:id/cancel`. The booking status updates to `CANCELLED`.
+  </Step>
+</Steps>

@@ -1,0 +1,50 @@
+---
+title: "Introduction"
+description: "FitWave is an Angular-based gym management platform for members to browse and book classes, and for administrators to manage trainers, schedules, and users."
+---
+
+FitWave is a web application built to eliminate the friction in gym operations. Members can self-serve — registering an account, browsing available classes, and booking sessions without staff involvement. Administrators get a dedicated dashboard to manage every aspect of the gym: trainers, class schedules, bookings, and user accounts.
+
+The frontend is an Angular 21 single-page application styled with TailwindCSS v4 and DaisyUI v5. It communicates with a REST API backend running at `http://localhost:8080`.
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="lock" href="/architecture#authentication">
+    Session-based login and registration with role-aware redirects. Members land on the user dashboard; administrators go to the admin dashboard.
+  </Card>
+  <Card title="Class browsing" icon="list" href="/architecture#gymclassservice">
+    Browse all available gym classes, each linked to a trainer and showing difficulty level.
+  </Card>
+  <Card title="Booking" icon="calendar" href="/architecture#bookingservice">
+    Book a scheduled class slot and cancel existing bookings from the user dashboard.
+  </Card>
+  <Card title="Admin dashboard" icon="shield" href="/architecture#role-based-routing">
+    Manage gym classes, trainers, schedules, and user accounts from a centralised admin interface.
+  </Card>
+  <Card title="Trainer management" icon="user" href="/architecture#trainerservice">
+    Add and remove trainers with name, specialty, and bio. Classes reference trainers by ID.
+  </Card>
+  <Card title="Schedule management" icon="clock" href="/architecture#scheduleservice">
+    Define weekly schedules with day, room, time slots, and capacity per class.
+  </Card>
+</CardGroup>
+
+## User roles
+
+FitWave has two roles that determine which routes and features are accessible after login.
+
+| Role | Default route | Access |
+|---|---|---|
+| Member | `/user-dashboard` | Browse classes, book and cancel sessions, view personal bookings |
+| Administrator | `/admin-dashboard` | All member access plus trainer, schedule, class, and user management |
+
+<Note>
+  Role assignment is handled server-side. The `roles` field on the authenticated user object determines which dashboard the Angular router redirects to after login.
+</Note>
+
+## Get started
+
+<Card title="Quick start" icon="rocket" href="/quickstart">
+  Register an account, log in, and make your first class booking in minutes.
+</Card>

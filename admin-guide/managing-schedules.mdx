@@ -1,0 +1,183 @@
+---
+title: "Managing Schedules"
+description: "How to create and manage class schedules, rooms, and time slots in FitWave."
+---
+
+Schedules define when and where a gym class takes place. Each schedule links a gym class to a specific day of the week, a time window, and a room with a set capacity. Members book specific schedules, not classes directly.
+
+The schedule management view is available at `/dashboard/horarios`.
+
+## The Schedule interface
+
+```typescript
+export interface Schedule {
+  scheduleId?: number;  // Assigned by the backend; omit when creating
+  dayOfWeek: number;    // 1 = Monday through 7 = Sunday
+  startTime: string;    // Format: "HH:mm:ss"
+  endTime: string;      // Format: "HH:mm:ss"
+  room: string;         // Room identifier, e.g. "Sala A"
+  totalSlots: number;   // Maximum number of members that can book this session
+  occupiedSlots: number; // Filled automatically as bookings come in
+  gymClassId: number;   // ID of the gym class this schedule belongs to
+}
+```
+
+### Day of week mapping
+
+| `dayOfWeek` value | Day |
+|-------------------|-----|
+| 1 | Monday |
+| 2 | Tuesday |
+| 3 | Wednesday |
+| 4 | Thursday |
+| 5 | Friday |
+| 6 | Saturday |
+| 7 | Sunday |
+
+## API reference
+
+### List all schedules
+
+```bash
+GET /api/schedules
+```
+
+Returns an array of `Schedule` objects for all classes.
+
+### Get a schedule by ID
+
+```bash
+GET /api/schedules/:id
+```
+
+Returns a single `Schedule` object.
+
+### Create a schedule
+
+<ParamField body="gymClassId" type="number" required>
+  The `id` of the gym class to schedule.
+</ParamField>
+
+<ParamField body="dayOfWeek" type="number" required>
+  Day of the week as a number from 1 (Monday) to 7 (Sunday).
+</ParamField>
+
+<ParamField body="startTime" type="string" required>
+  Session start time in `HH:mm:ss` format, e.g. `09:00:00`.
+</ParamField>
+
+<ParamField body="endTime" type="string" required>
+  Session end time in `HH:mm:ss` format, e.g. `10:00:00`.
+</ParamField>
+
+<ParamField body="room" type="string" required>
+  Room identifier, e.g. `Sala A`.
+</ParamField>
+
+<ParamField body="totalSlots" type="number" required>
+  Maximum number of bookings allowed for this session. Minimum 1.
+</ParamField>
+
+<ParamField body="occupiedSlots" type="number">
+  Defaults to `0` on creation. This field is managed automatically by the backend as members book and cancel sessions — you do not need to set it manually.
+</ParamField>
+
+```bash
+POST /api/schedules
+Content-Type: application/json
+
+{
+  "gymClassId": 5,
+  "dayOfWeek": 2,
+  "startTime": "09:00:00",
+  "endTime": "10:00:00",
+  "room": "Sala A",
+  "totalSlots": 20,
+  "occupiedSlots": 0
+}
+```
+
+<ResponseField name="scheduleId" type="number">
+  The ID assigned to the newly created schedule.
+</ResponseField>
+
+<ResponseField name="gymClassId" type="number">
+  The ID of the linked gym class.
+</ResponseField>
+
+<ResponseField name="dayOfWeek" type="number">
+  Day of the week (1–7).
+</ResponseField>
+
+<ResponseField name="startTime" type="string">
+  Session start time.
+</ResponseField>
+
+<ResponseField name="endTime" type="string">
+  Session end time.
+</ResponseField>
+
+<ResponseField name="room" type="string">
+  Room identifier.
+</ResponseField>
+
+<ResponseField name="totalSlots" type="number">
+  Total capacity.
+</ResponseField>
+
+<ResponseField name="occupiedSlots" type="number">
+  Number of confirmed bookings.
+</ResponseField>
+
+### Update a schedule
+
+```bash
+PUT /api/schedules/:id
+Content-Type: application/json
+```
+
+Accepts the same body as `POST /api/schedules`. Use this to change the time, room, or capacity of an existing schedule.
+
+### Delete a schedule
+
+```bash
+DELETE /api/schedules/:id
+```
+
+Permanently removes the schedule. Returns `204 No Content` on success.
+
+## Creating a schedule
+
+<Steps>
+  <Step title="Select a gym class">
+    At the top of the `/dashboard/horarios` page, you will see cards for every existing gym class. Click **Seleccionar** on the class you want to schedule. The selected card is highlighted and its `gymClassId` is set on the schedule form automatically.
+  </Step>
+  <Step title="Configure the schedule">
+    Fill in the schedule form:
+
+    - **Día** — Choose the day of the week from the dropdown (Lunes through Domingo).
+    - **Sala** — Enter the room name, e.g. `Sala A` or `Sala Principal`.
+    - **Hora de Inicio** — The time the session starts, using the browser time picker.
+    - **Hora de Fin** — The time the session ends.
+    - **Aforo Máximo** — The maximum number of members who can book this session. Defaults to 20.
+  </Step>
+  <Step title="Submit the schedule">
+    Click **Añadir Horario**. The button is disabled until both a class is selected and all form fields are valid. After saving, the new schedule card appears in the schedule listing below and the form resets to its defaults.
+  </Step>
+</Steps>
+
+<Note>
+  The `occupiedSlots` field is always initialized to `0` when a schedule is created. It is updated automatically each time a member makes or cancels a booking for that session — you do not need to manage it manually.
+</Note>
+
+## Schedule listing
+
+Below the form, all schedules are displayed as cards. Each card shows:
+
+- The day of the week (badge)
+- The class name
+- Start and end times
+- Room name
+- A progress bar showing `occupiedSlots / totalSlots`
+
+This lets you see at a glance which sessions are filling up and which still have available places.

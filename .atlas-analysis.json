@@ -1,0 +1,86 @@
+{
+  "projectType": "saas",
+  "projectName": "FitWave",
+  "projectDescription": "A gym management web application that lets members browse and book fitness classes while giving administrators tools to manage trainers, classes, and schedules.",
+  "theme": "almond",
+  "primaryColor": "#22f48d",
+  "lightColor": "#55fb8b",
+  "darkColor": "#c9fcd1",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "architecture"
+            ]
+          },
+          {
+            "group": "User Guide",
+            "pages": [
+              "user-guide/registration-and-login",
+              "user-guide/browsing-classes",
+              "user-guide/booking-classes",
+              "user-guide/dashboard"
+            ]
+          },
+          {
+            "group": "Admin Guide",
+            "pages": [
+              "admin-guide/admin-dashboard",
+              "admin-guide/managing-trainers",
+              "admin-guide/managing-classes",
+              "admin-guide/managing-schedules",
+              "admin-guide/managing-users"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/setup",
+              "development/project-structure",
+              "development/services",
+              "development/testing"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "User registration and session-based authentication",
+    "Browse gym classes with difficulty levels and trainer info",
+    "Book and cancel class reservations",
+    "Admin dashboard to manage trainers, classes, and schedules",
+    "Role-based access control (user vs. admin)",
+    "Weekly schedule management with room and slot tracking",
+    "User management with enable/disable controls"
+  ],
+  "publicApiSurface": [
+    "POST /api/auth/user-register — Register a new user",
+    "POST /api/auth/user-auth — Authenticate and start session",
+    "GET /api/auth/me — Get current session user",
+    "POST /api/auth/logout — End session",
+    "GET /api/classes — List all gym classes",
+    "POST /api/classes — Create a gym class (admin)",
+    "DELETE /api/classes/:id — Delete a gym class (admin)",
+    "GET /api/bookings — List all bookings (admin)",
+    "GET /api/bookings/:userId — Get bookings by user",
+    "POST /api/bookings — Create a booking",
+    "PATCH /api/bookings/:id/cancel — Cancel a booking",
+    "GET /api/schedules — List all schedules",
+    "GET /api/schedules/:id — Get a schedule by ID",
+    "POST /api/schedules — Create a schedule (admin)",
+    "PUT /api/schedules/:id — Update a schedule (admin)",
+    "DELETE /api/schedules/:id — Delete a schedule (admin)",
+    "GET /api/trainers — List all trainers",
+    "POST /api/trainers — Create a trainer (admin)",
+    "DELETE /api/trainers/:id — Delete a trainer (admin)",
+    "GET /api/user — List all users (admin)",
+    "PUT /api/user/disable-user/:email — Disable a user (admin)"
+  ]
+}

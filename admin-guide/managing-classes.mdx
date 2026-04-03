@@ -1,0 +1,146 @@
+---
+title: "Managing Gym Classes"
+description: "How to create, view, and delete gym classes in the FitWave admin dashboard."
+---
+
+Gym classes are the activity offerings that members can browse and book at FitWave. Each class is assigned to a trainer and given a difficulty rating to help members choose the right session.
+
+Class management lives inside the collapsible **Gestión de Clases** section on the [Admin Dashboard](/admin-guide/admin-dashboard).
+
+<Tip>
+  You must create at least one trainer before you can create a gym class. The class form requires selecting a trainer from the dropdown, and the list will be empty if no trainers exist. See [Managing Trainers](/admin-guide/managing-trainers) first.
+</Tip>
+
+## The GymClass interface
+
+```typescript
+export interface GymClass {
+  id: number;          // Assigned by the backend
+  title: string;       // Display name of the class
+  description: string; // What members can expect
+  difficulty: string;  // "Principiante" | "Intermedio" | "Avanzado"
+  trainerId: number;   // ID of the assigned trainer
+  trainerName: string; // Resolved automatically from the selected trainer
+}
+```
+
+## API reference
+
+### Create a class
+
+<ParamField body="title" type="string" required>
+  The display name of the class, e.g. `Boxeo Pro`.
+</ParamField>
+
+<ParamField body="difficulty" type="string" required>
+  Difficulty level. Must be one of: `Principiante`, `Intermedio`, `Avanzado`.
+</ParamField>
+
+<ParamField body="trainerId" type="number" required>
+  The `id` of the trainer to assign. The backend resolves `trainerName` automatically.
+</ParamField>
+
+<ParamField body="description" type="string" required>
+  A description of the class objectives and format.
+</ParamField>
+
+```bash
+POST /api/classes
+Content-Type: application/json
+
+{
+  "title": "Boxeo Pro",
+  "difficulty": "Avanzado",
+  "trainerId": 3,
+  "description": "High-intensity technical boxing for experienced athletes."
+}
+```
+
+<ResponseField name="id" type="number">
+  The ID assigned to the newly created class.
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  The class title.
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  The class description.
+</ResponseField>
+
+<ResponseField name="difficulty" type="string">
+  The difficulty level.
+</ResponseField>
+
+<ResponseField name="trainerId" type="number">
+  The ID of the assigned trainer.
+</ResponseField>
+
+<ResponseField name="trainerName" type="string">
+  The name of the assigned trainer, resolved by the backend.
+</ResponseField>
+
+### List all classes
+
+```bash
+GET /api/classes
+```
+
+Returns an array of `GymClass` objects.
+
+### Delete a class
+
+```bash
+DELETE /api/classes/:id
+```
+
+Permanently removes the class with the given `id`. Returns `204 No Content` on success.
+
+## Creating a class
+
+<Steps>
+  <Step title="Open the Class Management section">
+    On the Admin Dashboard, click the **Gestión de Clases** collapsible panel to expand it.
+  </Step>
+  <Step title="Fill in the class form">
+    Complete the **New Class** form:
+
+    - **Título de la Actividad** — The class name as it will appear to members (e.g. `Crossfit Matutino`).
+    - **Nivel de Dificultad** — Select one of:
+      - Principiante (Beginner)
+      - Intermedio (Intermediate)
+      - Avanzado (Advanced)
+    - **Asignar Entrenador Responsable** — Select a trainer from the dropdown. The list shows each trainer's name and specialty.
+    - **Descripción de la Clase** — A description of what the class covers and its goals.
+  </Step>
+  <Step title="Submit the form">
+    Click **Publicar Nueva Clase**. The button is disabled until all fields are valid. On success, the form resets and the new class card appears in the Class Listing section below.
+  </Step>
+</Steps>
+
+<Note>
+  When you select a trainer from the dropdown, the trainer's name is linked automatically by the backend. You do not need to enter the trainer's name separately.
+</Note>
+
+## Class listing
+
+Below the form, all existing classes are displayed as cards. Each card shows:
+
+- A class image
+- The class title
+- The class description
+- **Detalles** and **Eliminar** action buttons
+
+### Viewing class details
+
+Click **Detalles** to open a modal that shows the class title, difficulty badge, full description, and the name of the assigned trainer.
+
+### Deleting a class
+
+<Warning>
+  Deleting a class is permanent and cannot be undone. Any schedules associated with this class will retain the `gymClassId` reference, but the class will no longer be available in the system. Consider whether active schedules or bookings exist before deleting.
+</Warning>
+
+Click **Eliminar** on the class card. A confirmation modal will appear with the class name and a warning that the action cannot be undone. Click **Sí, eliminar** to proceed or **No, cancelar** to dismiss.
+
+If there are no classes in the system, the listing area displays: _"No hay clases programadas. ¡Crea la primera arriba!"_

@@ -1,0 +1,116 @@
+---
+title: "Project Structure"
+description: "Overview of FitWave's Angular source tree, page routes, and route guard behavior."
+---
+
+## Source tree
+
+FitWave follows the standard Angular project layout. All application code lives under `src/app/`, organized by concern.
+
+```text
+src/
+├── app/
+│   ├── components/               # Shared reusable components
+│   │   └── gym-classes-component/
+│   ├── guard/                    # Route guards
+│   │   └── home-guard.ts
+│   ├── interfaces/               # TypeScript interfaces
+│   │   ├── booking.ts
+│   │   ├── created-user.ts
+│   │   ├── current-auth-user.ts
+│   │   ├── gym-class.ts
+│   │   ├── schedule.ts
+│   │   ├── trainer.ts
+│   │   └── user-response.ts
+│   ├── pages/                    # Page-level components (routed views)
+│   │   ├── auth/
+│   │   │   ├── login-component/
+│   │   │   └── create-acount-component/
+│   │   ├── booking-component/
+│   │   ├── create-admin-component/
+│   │   ├── dashboard/
+│   │   │   ├── dashboard-user-component/
+│   │   │   └── dashboard-admin-component/
+│   │   ├── home-component/
+│   │   ├── schedule-component/
+│   │   └── user-component/
+│   ├── services/                 # Angular injectable services
+│   │   ├── auth/
+│   │   │   └── auth-service.ts
+│   │   ├── booking-service.ts
+│   │   ├── gym-class-service.ts
+│   │   ├── schedule-service.ts
+│   │   ├── trainer-service.ts
+│   │   └── user-service.ts
+│   └── shared/                   # Layout components used across pages
+│       ├── footer-component/
+│       ├── menu-component/
+│       ├── modal-component/
+│       └── nav-bar-component/
+└── styles.css                    # Global Tailwind CSS entry point
+```
+
+## Directory descriptions
+
+**`components/`** — Reusable UI components not tied to a specific route. Currently contains `gym-classes-component`, which renders the list of available gym classes and is shared between the home page and admin views.
+
+**`guard/`** — Angular functional route guards. `HomeGuard` runs on the `/home` route and redirects authenticated users to their appropriate dashboard (`/admin-dashboard` for admins, `/user-dashboard` for regular users).
+
+**`interfaces/`** — TypeScript interfaces that describe all domain objects exchanged with the backend API. These are used as generic type parameters in service methods and component properties throughout the app.
+
+**`pages/`** — Routed view components. Each subdirectory maps to one or more application routes. The `auth/` subdirectory contains the login and registration flows. The `dashboard/` subdirectory contains separate views for users and admins.
+
+**`services/`** — Angular `@Injectable` services that encapsulate all HTTP communication with the backend. Each service corresponds to a specific resource (bookings, schedules, classes, trainers, users). Auth lives in its own `auth/` subdirectory because it additionally manages client-side session state via a `BehaviorSubject`.
+
+**`shared/`** — Layout components rendered in every view: the navigation bar, sidebar menu, modal dialog, and footer. These are declared at the module level and do not belong to any single page.
+
+**`styles.css`** — The global stylesheet. It imports Tailwind CSS 4, which is processed through PostCSS via `@tailwindcss/postcss`.
+
+## Application routes
+
+Routes are defined in `src/app/app-routing-module.ts` and registered with `RouterModule.forRoot`. Unmatched paths redirect to `/home` via a wildcard catch-all.
+
+| Path | Component | Guard |
+|---|---|---|
+| `/home` | `HomeComponent` | `HomeGuard` |
+| `/login` | `LoginComponent` | — |
+| `/create-acount` | `CreateAcountComponent` | — |
+| `/user-dashboard` | `DashboardUserComponent` | — |
+| `/admin-dashboard` | `DashboardAdminComponent` | — |
+| `/dashboard/users` | `UserComponent` | — |
+| `/dashboard/horarios` | `ScheduleComponent` | — |
+| `/dashboard/reservas` | `BookingComponent` | — |
+| `/create-admin` | `CreateAdminComponent` | — |
+| `**` | — | redirects to `/home` |
+
+## HomeGuard behavior
+
+`HomeGuard` is a functional `CanActivateFn` guard. It subscribes to the `AuthService` user observable. If the current user has roles assigned, the guard redirects them away from `/home` to their dashboard and blocks access to the route. If no session data is present, access to `/home` is permitted.
+
+```typescript
+// src/app/guard/home-guard.ts
+export const HomeGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  let isUserLoggedIn = false;
+
+  authService.getUserLoggedIn$().subscribe((userData: CurrentAuthUser) => {
+    if (userData && userData.roles && userData.roles.length > 0) {
+      if (userData.roles.includes('ADMIN')) {
+        router.navigate(['/admin-dashboard']);
+      } else {
+        router.navigate(['/user-dashboard']);
+      }
+      isUserLoggedIn = true;
+    } else {
+      isUserLoggedIn = false;
+    }
+  });
+
+  return !isUserLoggedIn;
+};
+```
+
+<Info>
+  The guard returns `!isUserLoggedIn` synchronously while the observable resolves. Unauthenticated users always reach `/home`; authenticated users are immediately redirected to their dashboard.
+</Info>
